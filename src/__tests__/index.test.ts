@@ -1,16 +1,16 @@
 import * as assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { foobar } from "../index.js";
+import { idleTaskScheduler } from "../index.js";
 
 await describe("foobar()", async () => {
   await describe("given two positive integers", async () => {
-    const first = 1;
-    const second = 2;
-
     await describe("when called", async () => {
-      await it("returns the sum of them multiplied by 3", () => {
-        assert.equal(foobar(first, second), 9);
+      // check if the function can be called
+      await it("should not throw", () => {
+        assert.doesNotThrow(() => {
+          idleTaskScheduler(() => Promise.resolve());
+        });
       });
     });
   });
