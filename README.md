@@ -1,81 +1,86 @@
-# TypeScript Library Starter
+# Readme for idleTaskScheduler Library
 
-![NPM](https://img.shields.io/npm/l/@gjuchault/typescript-library-starter)
-![NPM](https://img.shields.io/npm/v/@gjuchault/typescript-library-starter)
-![GitHub Workflow Status](https://github.com/gjuchault/typescript-library-starter/actions/workflows/typescript-library-starter.yml/badge.svg?branch=main)
+## Overview
 
-Yet another (opinionated) TypeScript library starter template.
+The `idleTaskScheduler` library provides a higher-order function for efficiently scheduling asynchronous tasks. It leverages `requestIdleCallback` or `setTimeout` to execute tasks during idle times, ensuring the main thread is not blocked. This is particularly useful for preloading components or data in web applications without impacting user experience.
 
-If you're looking for a backend service starter, check out my [typescript-service-starter](https://github.com/gjuchault/typescript-service-starter)
+NOTE: Safari does not support `requestIdleCallback` and will use `setTimeout` instead.
 
-## Opinions and limitations
+## Installation
 
-1. Relies as much as possible on each included library's defaults
-2. Only relies on GitHub Actions
-3. Does not include documentation generation
+```bash
+npm install idle-task-scheduler
+```
 
-## Getting started
+or
 
-1. `npx degit gjuchault/typescript-library-starter my-project` or click on the `Use this template` button on GitHub!
-2. `cd my-project`
-3. `npm install`
-4. `git init` (if you used degit)
-5. `npm run setup`
+```bash
+yarn add idle-task-scheduler
+```
 
-To enable deployment, you will need to:
+## Usage
 
-1. Set up the `NPM_TOKEN` secret in GitHub Actions ([Settings > Secrets > Actions](https://github.com/gjuchault/typescript-library-starter/settings/secrets/actions))
-2. Give `GITHUB_TOKEN` write permissions for GitHub releases ([Settings > Actions > General](https://github.com/gjuchault/typescript-library-starter/settings/actions) > Workflow permissions)
+### Importing the Library
 
-## Features
+```javascript
+import idleTaskScheduler from 'idle-task-scheduler';
+```
 
-### Node.js, npm version
+### Basic Usage
 
-TypeScript Library Starter relies on [Volta](https://volta.sh/) to ensure the Node.js version is consistent across developers. It's also used in the GitHub workflow file.
+Wrap your promise function with `idleTaskScheduler` to schedule it during idle times:
 
-### TypeScript
+```javascript
+const fetchData = () => {
+  return new Promise((resolve) => {
+    // Your asynchronous data fetching logic
+    resolve(data);
+  });
+};
 
-Leverages [esbuild](https://github.com/evanw/esbuild) for blazing-fast builds but keeps `tsc` to generate `.d.ts` files.
-Generates a single ESM build.
+const scheduledFetch = idleTaskScheduler(fetchData);
+```
 
-Commands:
+### With Custom Options
 
-- `build`: runs type checking, then ESM and `d.ts` files in the `build/` directory
-- `clean`: removes the `build/` directory
-- `type:dts`: only generates `d.ts`
-- `type:check`: only runs type checking
-- `type:build`: only generates ESM
+You can provide custom options such as `timeout`:
 
-### Tests
+```javascript
+const scheduledFetch = idleTaskScheduler(fetchData, { timeout: 8000 });
+```
 
-TypeScript Library Starter uses [Node.js's native test runner](https://nodejs.org/api/test.html). Coverage is done using [c8](https://github.com/bcoe/c8) but will switch to Node.js's one once out.
+## API
 
-Commands:
+### idleTaskScheduler
 
-- `test`: runs test runner
-- `test:watch`: runs test runner in watch mode
-- `test:coverage`: runs test runner and generates coverage reports
+- **Type**: `<Args extends unknown[], Return>(promiseFn: (...args: Args) => Promise<Return>, options?: Options) => Promise<Return>`
+- **Description**: Schedules a promise function to execute during the browser's idle periods, minimizing impact on the main thread.
 
-### Format & lint
+#### Parameters
 
-This template relies on the combination of [ESLint](https://github.com/eslint/eslint) — through [TypeScript-ESLint](https://github.com/typescript-eslint/typescript-eslint) for linting, and [Prettier](https://github.com/prettier/prettier) for formatting.
-It also uses [cspell](https://github.com/streetsidesoftware/cspell) to ensure correct spelling.
+- `promiseFn`: The promise function containing your asynchronous task.
+- `options`: An optional object for configuration.
+  - `timeout`: (Optional) The maximum time in milliseconds the task is allowed to run before returning. Defaults to 5000ms.
 
-Commands:
+### requestIdleCallback (Internal Use)
 
-- `format`: runs Prettier with automatic fixing
-- `format:check`: runs Prettier without automatic fixing (used in CI)
-- `lint`: runs ESLint with automatic fixing
-- `lint:check`: runs ESLint without automatic fixing (used in CI)
-- `spell:check`: runs spell checking
+- **Description**: A polyfill for `requestIdleCallback`, used when it's not available in the `window` object.
+- **Parameters**:
+  - `cb`: The callback function to be executed.
+  - `options`: An object containing the `timeout` property.
 
-### Releasing
+## Compatibility
 
-Under the hood, this library uses [semantic-release](https://github.com/semantic-release/semantic-release) and [Commitizen](https://github.com/commitizen/cz-cli).
-The goal is to avoid manual release processes. Using `semantic-release` will automatically create a GitHub release (hence tags) as well as an npm release.
-Based on your commit history, `semantic-release` will automatically create a patch, feature, or breaking release.
+`idleTaskScheduler` is designed for use in web browser environments and checks for the presence of the `window` object.
 
-Commands:
+## Contributing
 
-- `cz`: interactive CLI that helps you generate a proper git commit message, using [Commitizen](https://github.com/commitizen/cz-cli)
-- `semantic-release`: triggers a release (used in CI)
+We welcome contributions to enhance the `idleTaskScheduler` library. Please refer to our contributing guidelines for more information.
+
+## License
+
+This project is licensed under the MIT License. Check the LICENSE file for full details.
+
+---
+
+**Note**: Users should have a basic understanding of promises and asynchronous JavaScript to effectively utilize `idleTaskScheduler`. The library is particularly beneficial in scenarios where non-blocking operations are critical, such as in complex web applications.

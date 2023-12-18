@@ -10,7 +10,7 @@ type Options = {
  * A higher-order function that wraps a promise in a requestIdleCallback or setTimeout to avoid blocking the main thread. This is useful for
  * preloading components or data that are not immediately needed. This is only used in the browser.
  */
-export default function idleWrapper<Args extends unknown[], Return>(
+export function idleTaskScheduler<Args extends unknown[], Return>(
     promiseFn: (...args: Args) => Promise<Return>,
     { timeout = 5000 }: Options = {}
 ) {
