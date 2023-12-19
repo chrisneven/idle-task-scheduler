@@ -25,7 +25,9 @@ export function idleTaskScheduler<Args extends unknown[], Return>(
             : requestIdleCallback;
         requestCallback(
           () => {
-            void promiseFn(...args).then(resolve).catch(reject);
+            void promiseFn(...args)
+              .then(resolve)
+              .catch(reject);
           },
           {
             timeout,
